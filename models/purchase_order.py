@@ -10,7 +10,7 @@ class PurchaseOrder(models.Model):
     landed_cost_method = fields.Selection([
     ('equal', 'Equal'),
     ('by_quantity', 'By Quantity'),
-    ('by_current_cost_price', 'By Current Cost'), # <--- Must be exactly this
+    ('by_current_cost_price', 'By Current Cost'), 
     ('by_weight', 'By Weight'),
     ('by_volume', 'By Volume'),
 ], string="Split Method", default='equal')
@@ -19,11 +19,11 @@ class StockPicking(models.Model):
     _inherit = 'stock.picking'
 
     def button_validate(self):
-        # Execute standard validation
+     
         res = super(StockPicking, self).button_validate()
 
         for picking in self:
-            # Check if it's an incoming shipment linked to a PO
+            
             if picking.state == 'done' and picking.picking_type_code == 'incoming' and picking.purchase_id:
                 po = picking.purchase_id
                 if po.est_freight_amt > 0 or po.est_customs_amt > 0:
@@ -31,16 +31,13 @@ class StockPicking(models.Model):
         return res
 
     def _create_automated_landed_costs(self, po):
-        # Find the Landed Cost product (ensure you have one for Freight and one for Customs)
-        # Or use a generic one for this example
+        # Landed Cost product (one for Freight and one for Customs)
+       
         landed_product = self.env['product.product'].search([('landed_cost_ok', '=', True)], limit=1)
         
         if not landed_product:
             return False
-
         cost_lines = []
-        
-        # Add Freight Line
         if po.est_freight_amt > 0:
             cost_lines.append((0, 0, {
                 'name': _('Auto Freight: %s') % po.name,
